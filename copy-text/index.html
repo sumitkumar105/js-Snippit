@@ -1,0 +1,104 @@
+<!-- <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="">
+        <input class="copy-text" placeholder="enter text to copy" />
+        <button id="copy-btn">copy text</button>
+        <div id="tooltip">Copied!</div>
+      </div>
+      <div>
+        <input type="text" placeholder="Enter OTP" />
+        <button id="resendBtn">Resend OTP (<span id="timer">30</span>s)</button>
+      </div>
+    </div>
+    <script src="./script.js"></script>
+  </body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OTP Timer</title>
+    <style>
+      button[disabled] {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Enter OTP</h2>
+    <input type="text" placeholder="Enter OTP" />
+
+    <br /><br />
+
+    <button id="resendBtn" disabled>
+      Resend OTP (<span id="timer">30</span>s)
+    </button>
+
+    <script>
+      const resendBtn = document.getElementById("resendBtn");
+      const timerSpan = document.getElementById("timer");
+
+      const DURATION = 30; // seconds
+      const TIMER_KEY = "otp_timer_start";
+      let interval;
+
+      function startCountdown(secondsLeft) {
+        resendBtn.disabled = true;
+        resendBtn.innerHTML = `Resend OTP (<span id="timer">${secondsLeft}</span>s)`;
+
+        interval = setInterval(() => {
+          secondsLeft--;
+          const timerEl = document.getElementById("timer");
+          if (timerEl) {
+            timerEl.textContent = secondsLeft;
+          }
+
+          if (secondsLeft <= 0) {
+            clearInterval(interval);
+            resendBtn.disabled = false;
+            resendBtn.textContent = "Resend OTP";
+            localStorage.removeItem(TIMER_KEY);
+          }
+        }, 1000);
+      }
+
+      function onResendClick() {
+        const startTime = Date.now();
+        localStorage.setItem(TIMER_KEY, startTime);
+        startCountdown(DURATION);
+        console.log("OTP resent");
+      }
+
+      // Attach click handler
+      resendBtn.addEventListener("click", onResendClick);
+
+      // On page load, restore timer if needed
+      window.addEventListener("load", () => {
+        const saved = localStorage.getItem(TIMER_KEY);
+        if (saved) {
+          const elapsed = Math.floor((Date.now() - parseInt(saved)) / 1000);
+          const remaining = DURATION - elapsed;
+
+          if (remaining > 0) {
+            startCountdown(remaining);
+          } else {
+            resendBtn.disabled = false;
+            resendBtn.textContent = "Resend OTP";
+            localStorage.removeItem(TIMER_KEY);
+          }
+        } else {
+          // Initial state (no timer running)
+          resendBtn.disabled = false;
+          resendBtn.textContent = "Resend OTP";
+        }
+      });
+    </script>
+  </body>
+</html>
